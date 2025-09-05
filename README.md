@@ -1,7 +1,7 @@
-:ramen: 🍔 miso-sampler 
+:ramen: 🗞️ miso-blog
 ====================
 
-A simple example of using [miso](https://github.com/dmjio/miso) w/ nix integration. This project contains a sample miso application with scripts to develop against vanilla GHC and to compile to Web Assembly.
+A [miso](https://github.com/dmjio/miso) application for the Haskell miso blog. Hosted at [blog.haskell-miso.org](https://blog.haskell-miso.org).
 
 > [!TIP] 
 > This requires installing [nix](https://nixos.org) with [Nix Flakes](https://wiki.nixos.org/wiki/Flakes) enabled.
@@ -12,7 +12,7 @@ A simple example of using [miso](https://github.com/dmjio/miso) w/ nix integrati
 Call `nix develop` to enter a shell with [GHC 9.12.2](https://haskell.org/ghc)
 
 ```bash
-$ nix develop --experimental-features nix-command --extra-experimental-features flakes
+$ nix develop --experimental-features nix-command
 ```
 
 Once in the shell, you can call `cabal run` to start the development server and view the application at http://localhost:8080
@@ -20,13 +20,13 @@ Once in the shell, you can call `cabal run` to start the development server and 
 ### Build (Web Assembly)
 
 ```bash
-$ nix develop .#wasm --command bash -c "make" --experimental-features 'nix-command flakes'
+$ nix develop .#wasm --command bash -c "make"
 ```
 
 ### Build (JavaScript)
 
 ```bash
-$ nix develop .#ghcjs --command bash -c "build" --experimental-features 'nix-command flakes'
+$ nix develop .#ghcjs --command bash -c "build"
 ```
 
 ### Serve
@@ -34,7 +34,7 @@ $ nix develop .#ghcjs --command bash -c "build" --experimental-features 'nix-com
 To host the built application you can call `serve`
 
 ```bash
-$ nix develop .#wasm --command bash -c "serve" --experimental-features 'nix-command flakes'
+$ nix develop .#wasm --command bash -c "serve"
 ```
 
 ### Clean
