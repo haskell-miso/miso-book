@@ -1,4 +1,4 @@
-:ramen: 🗞️ miso-book
+🍜 📚 miso-book
 ====================
 
 A [miso](https://github.com/dmjio/miso) application for the Haskell miso book. Hosted at [book.haskell-miso.org](https://book.haskell-miso.org).
