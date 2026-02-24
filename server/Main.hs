@@ -23,12 +23,12 @@ main = do
   putStrLn "Wrote to public/introduction.html..."
   BL8.writeFile ("public/" <> "install.html") $ toHtml (template Install)
   putStrLn "Wrote to public/install.html..."
-  BL8.writeFile ("public/chapter/" <> "1.html") $ toHtml (template (Chapter (Capture 1)))
-  putStrLn "Wrote to public/chapter/1.html..."
-  BL8.writeFile ("public/chapter/" <> "2.html") $ toHtml (template (Chapter (Capture 2)))
-  putStrLn "Wrote to public/chapter/2.html..."
-  BL8.writeFile ("public/chapter/" <> "3.html") $ toHtml (template (Chapter (Capture 3)))
-  putStrLn "Wrote to public/chapter/3.html..."
+  BL8.writeFile ("public/chapter/1/" <> "index.html") $ toHtml (template (Chapter (Capture 1)))
+  putStrLn "Wrote to public/chapter/1/index.html..."
+  BL8.writeFile ("public/chapter/2/" <> "index.html") $ toHtml (template (Chapter (Capture 2)))
+  putStrLn "Wrote to public/chapter/2/index.html..."
+  BL8.writeFile ("public/chapter/3/" <> "index.html") $ toHtml (template (Chapter (Capture 3)))
+  putStrLn "Wrote to public/chapter/3/index.html..."
 -----------------------------------------------------------------------------
 template :: Route -> [View m a]
 template r =
@@ -43,7 +43,7 @@ template r =
           ]
       , H.title_ [] ["miso-book"]
       , H.script_
-          [ src_ "index.js", type_ "module"
+          [ src_ "/index.js", type_ "module"
           ] mempty
       , H.script_
           [ src_ "https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/all.min.js"

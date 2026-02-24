@@ -19,7 +19,7 @@ build:
 	cp -rv assets public/
 
 prerender:
-	mkdir -pv public/chapter/
+	mkdir -pv public/chapter/{1,2,3}
 	nix develop --command bash -c "cabal update && cabal run prerender"
 
 optim:
