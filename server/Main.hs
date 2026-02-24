@@ -56,12 +56,12 @@ template r =
           ]
       , meta_
           [ content_
-              "A miso component library built on Tailwind, ShadCN and Basecoat CSS"
+              "The Haskell miso book"
           , name_ "description"
           ]
       , meta_
           [ content_
-              "components,component library,component system,miso, haskell, haskell-miso, UI,UI kit,shadcn,shadcn/ui,Tailwind CSS,Tailwind,CSS,HTML,monads,JS,JavaScript,vanilla JS,vanilla JavaScript"
+              "Haskell, miso, book, JavaScript"
           , name_ "keywords"
           ]
       , link_
@@ -85,7 +85,7 @@ template r =
           ]
       , meta_
           [ content_
-              "A miso component library built on Tailwind, ShadCN and Basecoat CSS"
+              "The Haskell miso book"
           , textProp "property" "og:description"
           ]
       , meta_
@@ -109,7 +109,7 @@ template r =
           [content_ "miso-book", name_ "twitter:title"]
       , meta_
           [ content_
-              "A collection of all the components available in miso-book"
+              "The Haskell miso book"
           , name_ "twitter:description"
           ]
       , meta_
