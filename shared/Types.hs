@@ -12,7 +12,6 @@
 module Types where
 -----------------------------------------------------------------------------
 import           GHC.Generics
-import           Control.Monad
 -----------------------------------------------------------------------------
 import           Miso hiding (view)
 import           Miso.FFI.QQ (js)
@@ -633,12 +632,12 @@ view uri = div_
                 , div_
                     [class_ "sm:hidden"]
                     [ button_
-                        [ textProp "onclick" ""
-                        , aria_ "controls" "mobile-menu"
+                        [ aria_ "controls" "mobile-menu"
                         , aria_ "expanded" "false"
                         , aria_ "label" "Toggle menu"
                         , class_ "btn-sm-icon-ghost peer group"
                         , type_ "button"
+                        , textProp "onclick" "this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true')"
                         ]
                         [ span_
                             [class_ "group-aria-expanded:hidden"]
