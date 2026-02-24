@@ -1,7 +1,7 @@
-:ramen: 🗞️ miso-blog
+:ramen: 🗞️ miso-book
 ====================
 
-A [miso](https://github.com/dmjio/miso) application for the Haskell miso blog. Hosted at [blog.haskell-miso.org](https://blog.haskell-miso.org).
+A [miso](https://github.com/dmjio/miso) application for the Haskell miso book. Hosted at [book.haskell-miso.org](https://book.haskell-miso.org).
 
 > [!TIP] 
 > This requires installing [nix](https://nixos.org) with [Nix Flakes](https://wiki.nixos.org/wiki/Flakes) enabled.
