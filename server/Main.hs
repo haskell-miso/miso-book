@@ -34,7 +34,7 @@ indexHtml =
           [ src_ "index.js", type_ "module"
           ] mempty
       , H.script_
-          [ src_ "https://cdn.jsdelivr.net/npm/basecoat-css@0.3.6/dist/js/all.min.js"
+          [ src_ "https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/all.min.js"
           ] mempty
       , link_
           [rel_ "stylesheet", href_ "/assets/styles.css"]

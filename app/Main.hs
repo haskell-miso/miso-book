@@ -1,24 +1,29 @@
 -----------------------------------------------------------------------------
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE CPP               #-}
-{-# LANGUAGE LambdaCase        #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE DeriveAnyClass     #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE QuasiQuotes        #-}
+{-# LANGUAGE LambdaCase         #-}
+{-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE CPP                #-}
 -----------------------------------------------------------------------------
 module Main where
 -----------------------------------------------------------------------------
+import           GHC.Generics
 import           Control.Monad
 -----------------------------------------------------------------------------
--- import           Miso.FFI.QQ (js)
+import           Miso hiding (view)
+import           Miso.FFI.QQ (js)
 import           Miso.Html hiding (data_)
--- import qualified Miso.Html as H
 import qualified Miso.Html.Property as P
 import           Miso.Html.Property hiding (title_, label_, href_, form_)
 import           Miso.Svg.Element hiding (title_)
 import qualified Miso.Svg.Element as S
 import           Miso.Svg.Property hiding (target_, path_)
------------------------------------------------------------------------------
-import           Miso
--- import           Miso.Lens
+import           Miso.Router
+import           Miso.Lens hiding (view)
 -----------------------------------------------------------------------------
 #ifdef WASM
 foreign export javascript "hs_start" main :: IO ()
@@ -32,13 +37,52 @@ withLocalJS action = void $ do
   action
 -----------------------------------------------------------------------------
 main :: IO ()
-main = startApp defaultEvents app
+main = miso defaultEvents app
 -----------------------------------------------------------------------------
-app :: App () action
-app = component () noop $ \() -> view'
+data Action
+  = ToggleDarkMode
+  | ToggleSidebar
+  | Highlight DOMRef
+  | CopyButton DOMRef
+  | ChangeRoute (Either RoutingError Route)
+  | GoTo Route
 -----------------------------------------------------------------------------
-view' :: View m a
-view' = div_
+data Route
+ = Index
+ | Introduction
+ | Install
+ | Chapter (Capture "chapter" Int)
+ deriving stock (Generic, Show)
+ deriving anyclass Router
+-----------------------------------------------------------------------------
+app :: URI -> App URI Action
+app uri = (component uri update_ view)
+  { subs = [ routerSub ChangeRoute ]
+  , logLevel = DebugHydrate
+  } where
+      update_ = \case
+        CopyButton domRef ->
+          io_ [js| return copyButton(${domRef}); |]
+        ToggleSidebar ->
+          io_ [js| document.dispatchEvent (new CustomEvent('basecoat:sidebar')); |]
+        ToggleDarkMode ->
+          io_ [js| return document.dispatchEvent (new CustomEvent('basecoat:theme')); |]
+        Highlight domRef ->
+          io_ [js| return hljs.highlightElement(${domRef}); |]
+        ChangeRoute (Left _) -> do
+          io_ (consoleLog "couldn't route!")
+        ChangeRoute (Right r) -> do
+          this .= toURI r
+        GoTo r -> do
+          let u = toURI r
+          io_ $ do
+            consoleLog (prettyURI u)
+            print u
+          io_ (pushURI u)
+          this .= u
+-----------------------------------------------------------------------------
+view :: URI -> View m Action
+view uri = div_
     []
     [ aside_
         [ aria_ "hidden" "false"
@@ -52,7 +96,7 @@ view' = div_
                 []
                 [ a_
                     [ class_ "btn-ghost p-2 h-12 w-full justify-start"
-                    , P.href_ "/"
+                    , onClick (GoTo Index)
                     ]
                     [ div_
                         [ class_
@@ -84,7 +128,7 @@ view' = div_
                         ]
                         [ span_
                             [class_ "truncate font-semibold"]
-                            ["The miso book"]
+                            ["the miso book"]
                         , span_
                             [ class_ "truncate text-xs text-muted-foreground"
                             ]
@@ -106,7 +150,8 @@ view' = div_
                         [ li_
                             []
                             [ a_
-                                [P.href_ "/"]
+                                [ onClick (GoTo Introduction)
+                                ]
                                 [ svg_
                                     [ strokeLinejoin_ "round"
                                     , strokeLinecap_ "round"
@@ -129,7 +174,8 @@ view' = div_
                         , li_
                             []
                             [ a_
-                                [P.href_ "/install/"]
+                                [ onClick (GoTo Install)
+                                ]
                                 [ svg_
                                     [ strokeLinejoin_ "round"
                                     , strokeLinecap_ "round"
@@ -153,36 +199,37 @@ view' = div_
                                 , span_ [] ["Install"]
                                 ]
                             ]
-                        , li_
-                            []
-                            [ a_
-                                [P.href_ "/customize/"]
-                                [ svg_
-                                    [ strokeLinejoin_ "round"
-                                    , strokeLinecap_ "round"
-                                    , strokeWidth_ "2"
-                                    , stroke_ "currentColor"
-                                    , fill_ "none"
-                                    , viewBox_ "0 0 24 24"
-                                    , height_ "24"
-                                    , width_ "24"
-                                    , xmlns_ "http://www.w3.org/2000/svg"
-                                    , class_
-                                        "lucide lucide-sliders-vertical lucide-sliders-vertical"
-                                    ]
-                                    [ S.path_ [d_ "M10 8h4"]
-                                    , S.path_ [d_ "M12 21v-9"]
-                                    , S.path_ [d_ "M12 8V3"]
-                                    , S.path_ [d_ "M17 16h4"]
-                                    , S.path_ [d_ "M19 12V3"]
-                                    , S.path_ [d_ "M19 21v-5"]
-                                    , S.path_ [d_ "M3 14h4"]
-                                    , S.path_ [d_ "M5 10V3"]
-                                    , S.path_ [d_ "M5 21v-7"]
-                                    ]
-                                , span_ [] ["Customize"]
-                                ]
-                            ]
+                        -- , li_
+                        --     []
+                        --     [ a_
+                        --         [ onClick (GoTo Customize)
+                        --         ]
+                        --         [ svg_
+                        --             [ strokeLinejoin_ "round"
+                        --             , strokeLinecap_ "round"
+                        --             , strokeWidth_ "2"
+                        --             , stroke_ "currentColor"
+                        --             , fill_ "none"
+                        --             , viewBox_ "0 0 24 24"
+                        --             , height_ "24"
+                        --             , width_ "24"
+                        --             , xmlns_ "http://www.w3.org/2000/svg"
+                        --             , class_
+                        --                 "lucide lucide-sliders-vertical lucide-sliders-vertical"
+                        --             ]
+                        --             [ S.path_ [d_ "M10 8h4"]
+                        --             , S.path_ [d_ "M12 21v-9"]
+                        --             , S.path_ [d_ "M12 8V3"]
+                        --             , S.path_ [d_ "M17 16h4"]
+                        --             , S.path_ [d_ "M19 12V3"]
+                        --             , S.path_ [d_ "M19 21v-5"]
+                        --             , S.path_ [d_ "M3 14h4"]
+                        --             , S.path_ [d_ "M5 10V3"]
+                        --             , S.path_ [d_ "M5 21v-7"]
+                        --             ]
+                        --         , span_ [] ["Customize"]
+                        --         ]
+                        --     ]
                         , li_
                             []
                             [ details_
@@ -215,25 +262,33 @@ view' = div_
                                         , S.path_ [d_ "M16 13H8"]
                                         , S.path_ [d_ "M16 17H8"]
                                         ]
-                                    , "Manage content"
+                                    , "Chapters"
                                     ]
                                 , ul_
                                     [id_ "submenu-sidebar-content-1-4-content"]
                                     [ li_
                                         []
                                         [ a_
-                                            [P.href_ "/content/navigation/"]
-                                            [span_ [] ["Navigation"]]
-                                        ]
-                                    , li_
-                                        []
-                                        [ a_ [P.href_ "/content/pages/"] [span_ [] ["Pages"]]
+                                            [ onClick (GoTo (Chapter (Capture 1)))
+                                            ]
+                                            [ span_ [] ["Chapter 1"]
+                                            ]
                                         ]
                                     , li_
                                         []
                                         [ a_
-                                            [P.href_ "/content/content-management-system/"]
-                                            [span_ [] ["CMS"]]
+                                          [ onClick (GoTo (Chapter (Capture 2)))
+                                          ]
+                                          [ span_ [] ["Chapter 2"]
+                                          ]
+                                        ]
+                                    , li_
+                                        []
+                                        [ a_
+                                            [ onClick (GoTo (Chapter (Capture 3)))
+                                            ]
+                                            [ span_ [] ["Chapter 3"]
+                                            ]
                                         ]
                                     ]
                                 ]
@@ -460,8 +515,8 @@ view' = div_
                     , data_ "side" "bottom"
                     , data_ "tooltip" "Toggle sidebar"
                     , aria_ "label" "Toggle sidebar"
-                    , textProp "onclick" ""
                     , type_ "button"
+                    , onClick ToggleSidebar
                     ]
                     [ svg_
                         [ strokeLinejoin_ "round"
@@ -542,6 +597,7 @@ view' = div_
                         , data_ "tooltip" "Toggle dark mode"
                         , aria_ "label" "Toggle dark mode"
                         , type_ "button"
+                        , onClickCapture ToggleDarkMode
                         ]
                         [ span_
                             [class_ "hidden dark:block"]
@@ -749,31 +805,31 @@ view' = div_
                                             , data_ "popover" ""
                                             , id_ "dropdown-menu-358381-popover"
                                             ]
-                                            [ -- div_
-                                              --   [ aria_ "labelledby" "dropdown-menu-358381-trigger"
-                                              --   , id_ "dropdown-menu-358381-menu"
-                                              --   , role_ "menu"
-                                              --   ]
-                                              --   [ a_
-                                              --       [ rel_ "noopener"
-                                              --       , target_ "_blank"
-                                              --       , P.href_ "/index.md"
-                                              --       , role_ "menuitem"
-                                              --       , id_ "dropdown-menu-358381-items-1"
-                                              --       ]
-                                              --       [ svg_
-                                              --           [viewBox_ "0 0 22 16", strokeLinejoin_ "round"]
-                                              --           [ S.path_
-                                              --               [ fill_ "currentColor"
-                                              --               , d_
-                                              --                   "M19.5 2.25H2.5C1.80964 2.25 1.25 2.80964 1.25 3.5V12.5C1.25 13.1904 1.80964 13.75 2.5 13.75H19.5C20.1904 13.75 20.75 13.1904 20.75 12.5V3.5C20.75 2.80964 20.1904 2.25 19.5 2.25ZM2.5 1C1.11929 1 0 2.11929 0 3.5V12.5C0 13.8807 1.11929 15 2.5 15H19.5C20.8807 15 22 13.8807 22 12.5V3.5C22 2.11929 20.8807 1 19.5 1H2.5ZM3 4.5H4H4.25H4.6899L4.98715 4.82428L7 7.02011L9.01285 4.82428L9.3101 4.5H9.75H10H11V5.5V11.5H9V7.79807L7.73715 9.17572L7 9.97989L6.26285 9.17572L5 7.79807V11.5H3V5.5V4.5ZM15 8V4.5H17V8H19.5L17 10.5L16 11.5L15 10.5L12.5 8H15Z"
-                                              --               , textProp "clip-rule" "evenodd"
-                                              --               , textProp "fill-rule" "evenodd"
-                                              --               ]
-                                              --           ]
-                                              --       , "View as Markdown"
-                                              --       ]
-                                              --   ,
+                                            [ div_
+                                                [ aria_ "labelledby" "dropdown-menu-358381-trigger"
+                                                , id_ "dropdown-menu-358381-menu"
+                                                , role_ "menu"
+                                                ]
+                                                [ a_
+                                                    [ rel_ "noopener"
+                                                    , target_ "_blank"
+                                                    , P.href_ "/index.md"
+                                                    , role_ "menuitem"
+                                                    , id_ "dropdown-menu-358381-items-1"
+                                                    ]
+                                                    [ svg_
+                                                        [viewBox_ "0 0 22 16", strokeLinejoin_ "round"]
+                                                        [ S.path_
+                                                            [ fill_ "currentColor"
+                                                            , d_
+                                                                "M19.5 2.25H2.5C1.80964 2.25 1.25 2.80964 1.25 3.5V12.5C1.25 13.1904 1.80964 13.75 2.5 13.75H19.5C20.1904 13.75 20.75 13.1904 20.75 12.5V3.5C20.75 2.80964 20.1904 2.25 19.5 2.25ZM2.5 1C1.11929 1 0 2.11929 0 3.5V12.5C0 13.8807 1.11929 15 2.5 15H19.5C20.8807 15 22 13.8807 22 12.5V3.5C22 2.11929 20.8807 1 19.5 1H2.5ZM3 4.5H4H4.25H4.6899L4.98715 4.82428L7 7.02011L9.01285 4.82428L9.3101 4.5H9.75H10H11V5.5V11.5H9V7.79807L7.73715 9.17572L7 9.97989L6.26285 9.17572L5 7.79807V11.5H3V5.5V4.5ZM15 8V4.5H17V8H19.5L17 10.5L16 11.5L15 10.5L12.5 8H15Z"
+                                                            , textProp "clip-rule" "evenodd"
+                                                            , textProp "fill-rule" "evenodd"
+                                                            ]
+                                                        ]
+                                                    , "View as Markdown"
+                                                    ]
+                                                ,
                                                   a_
                                                     [ rel_ "noopener"
                                                     , target_ "_blank"
@@ -846,6 +902,7 @@ view' = div_
                                         [ class_
                                             "btn-sm-icon-secondary hidden sm:flex size-7"
                                         , P.href_ "/install/"
+                                        , onClickPrevent (GoTo Install)
                                         ]
                                         [ span_ [class_ "sr-only"] ["Install"]
                                         , svg_
@@ -868,7 +925,7 @@ view' = div_
                             ]
                         , p_
                             [class_ "text-muted-foreground sm:text-base"]
-                            [ "The Haskell miso book"
+                            [ "The Haskell miso book 📖 🍜 "
                             ]
                         ]
                     , div_
@@ -879,7 +936,13 @@ view' = div_
                                 [ P.href_ "#why-miso%3F"
                                 , class_ "header-anchor"
                                 ]
-                                ["coming soon"]
+                                [ case route uri of
+                                    Right Index -> "home"
+                                    Right Introduction -> "introduction"
+                                    Right Install -> "install"
+                                    Right (Chapter (Capture n)) -> text ("chapter " <> ms n)
+                                    _ -> "oops"
+                                ]
                             ]
                         ]
 --                        , p_
@@ -1015,6 +1078,7 @@ view' = div_
                     --     ]
                     -- ]
                     ]
+                ]
             , aside_
                 [class_ "hidden xl:block w-56"]
                 [ div_
@@ -1051,7 +1115,8 @@ view' = div_
                             [ li_
                                 []
                                 [ a_
-                                    [] -- P.href_ "#WhyF"]
+                                    [ onClick (GoTo Index)
+                                    ]
                                     ["The miso book"]
                                 ]
                             , li_
@@ -1068,6 +1133,6 @@ view' = div_
                     ]
                 ]
             ]
-        ]
+       ]
     ]
     
