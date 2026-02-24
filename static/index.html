@@ -1,13 +1,61 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark theme-claude">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title> miso-sampler </title>
+    <title> miso-book </title>
+    <script defer src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.6/dist/js/all.min.js"></script>
+    <link href="/assets/styles.css" rel="stylesheet" />
+    <meta http-equiv="Content-Language" content="en">
+    <meta name="description" content="The Haskell miso book" />
+    <meta name="keywords" content="Haskell, miso, ebook" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">  
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://book.haskell-miso.org">
+    <meta property="og:title" content="Haskell miso | miso-book ">
+    <meta property="og:description" content="The Haskell book">
+    <meta property="og:image" content="https://book.haskell-miso.org/assets/social-screenshot.png">
+    <meta property="og:site_name" content="miso-book">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:author" content="dmjio">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://book.haskell-miso.org">
+    <meta name="twitter:title" content="miso-book">
+    <meta name="twitter:description" content="A collection of all the components available in miso-book">
+    <meta name="twitter:image" content="https://book.haskell-miso.org/assets/social-screenshot.png">
+    <meta name="twitter:creator" content="@dmjio">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/haskell.min.js"></script>
+    <script>
+         (() => {
+           try {
+             const stored = localStorage.getItem('themeMode');
+             if (stored ? stored === 'dark'
+                        : matchMedia('(prefers-color-scheme: dark)').matches) {
+               document.documentElement.classList.add('dark');
+             }
+           } catch (_) {}
+           const apply = dark => {
+             document.documentElement.classList.toggle('dark', dark);
+             try { localStorage.setItem('themeMode', dark ? 'dark' : 'light'); } catch (_) {}
+           };
+           document.addEventListener('basecoat:theme', (event) => {
+             const mode = event.detail?.mode;
+             apply(mode === 'dark' ? true
+                  : mode === 'light' ? false
+                  : !document.documentElement.classList.contains('dark'));
+           });
+         })();
+    </script>
+    <style>
+    html, body {
+      overflow-x: clip;
+    }
+  </style>
   </head>
   <body>
     <script src="index.js" type="module"></script>
   </body>
 </html>
-

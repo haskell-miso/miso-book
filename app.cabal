@@ -1,13 +1,13 @@
 cabal-version:      3.0
-name:               app
+name:               miso-book
 version:            0.1.0.0
-synopsis:           The haskell miso book website
+synopsis:           The Haskell miso book website
 description:        Book for the Haskell miso project
 license:            BSD-3-Clause
 license-file:       LICENSE
 author:             dmjio
 maintainer:         code@dmj.io
-copyright:          haskell-miso @ 2025
+copyright:          haskell-miso @ 2026
 category:           Web
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
@@ -28,7 +28,10 @@ executable app
     wasm, warnings
   main-is:
     Main.hs
-  build-depends: base < 5, containers >= 0.7, miso
+  build-depends:
+    base < 5,
+    containers >= 0.7,
+    miso
   hs-source-dirs:
     app
   default-language:

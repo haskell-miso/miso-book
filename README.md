@@ -12,7 +12,7 @@ A [miso](https://github.com/dmjio/miso) application for the Haskell miso book. H
 Call `nix develop` to enter a shell with [GHC 9.12.2](https://haskell.org/ghc)
 
 ```bash
-$ nix develop --experimental-features nix-command
+$ nix develop .#wasm --experimental-features nix-command
 ```
 
 Once in the shell, you can call `cabal run` to start the development server and view the application at http://localhost:8080
@@ -20,7 +20,7 @@ Once in the shell, you can call `cabal run` to start the development server and 
 ### Build (Web Assembly)
 
 ```bash
-$ nix develop .#wasm --command bash -c "make"
+$ nix develop .#wasm --command bash -c "make all"
 ```
 
 ### Build (JavaScript)
