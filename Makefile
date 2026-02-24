@@ -1,6 +1,6 @@
 .PHONY= update build optim
 
-all: update build optim
+all: update build optim prerender
 
 js: update-js build-js
 
@@ -19,6 +19,7 @@ build:
 	cp -rv assets public/
 
 prerender:
+	mkdir -pv public/chapter/
 	nix develop --command bash -c "cabal update && cabal run prerender"
 
 optim:

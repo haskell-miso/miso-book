@@ -1,4 +1,5 @@
 -----------------------------------------------------------------------------
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE MultilineStrings  #-}
 -----------------------------------------------------------------------------
@@ -6,20 +7,31 @@ module Main where
 -----------------------------------------------------------------------------
 import qualified Data.ByteString.Lazy.Char8 as BL8
 -----------------------------------------------------------------------------
-import           Client (app)
------------------------------------------------------------------------------
 import           Miso
+import           Miso.Router hiding (href_)
 import           Miso.Html hiding (title_)
 import qualified Miso.Html as H
 import           Miso.Html.Property
 -----------------------------------------------------------------------------
+import           Types
+-----------------------------------------------------------------------------
 main :: IO ()
 main = do
-  BL8.writeFile ("public/" <> "index.html") (toHtml indexHtml)
+  BL8.writeFile ("public/" <> "index.html") $ toHtml (template Index)
   putStrLn "Wrote to public/index.html..."
+  BL8.writeFile ("public/" <> "introduction.html") $ toHtml (template Introduction)
+  putStrLn "Wrote to public/introduction.html..."
+  BL8.writeFile ("public/" <> "install.html") $ toHtml (template Install)
+  putStrLn "Wrote to public/install.html..."
+  BL8.writeFile ("public/chapter/" <> "1.html") $ toHtml (template (Chapter (Capture 1)))
+  putStrLn "Wrote to public/chapter/1.html..."
+  BL8.writeFile ("public/chapter/" <> "2.html") $ toHtml (template (Chapter (Capture 2)))
+  putStrLn "Wrote to public/chapter/2.html..."
+  BL8.writeFile ("public/chapter/" <> "3.html") $ toHtml (template (Chapter (Capture 3)))
+  putStrLn "Wrote to public/chapter/3.html..."
 -----------------------------------------------------------------------------
-indexHtml :: [View m a]
-indexHtml =
+template :: Route -> [View m a]
+template r =
   [ doctype_
   , html_ [ lang_ "en", class_ "dark theme-claude" ]
     [ head_
@@ -29,7 +41,7 @@ indexHtml =
           [ content_ "width=device-width, initial-scale=1"
           , name_ "viewport"
           ]
-      , H.title_ [] ["miso-ui"]
+      , H.title_ [] ["miso-book"]
       , H.script_
           [ src_ "index.js", type_ "module"
           ] mempty
@@ -64,11 +76,11 @@ indexHtml =
           ]
       , meta_ [content_ "website", textProp "property" "og:type"]
       , meta_
-          [ content_ "https://miso-ui.haskell-miso.org"
+          [ content_ "https://book.haskell-miso.org"
           , textProp "property" "og:url"
           ]
       , meta_
-          [ content_ "Haskell miso | miso-ui "
+          [ content_ "Haskell miso | miso-book "
           , textProp "property" "og:title"
           ]
       , meta_
@@ -78,11 +90,11 @@ indexHtml =
           ]
       , meta_
           [ content_
-              "https://miso-ui.haskell-miso.org/assets/social-screenshot.png"
+              "https://book.haskell-miso.org/assets/social-screenshot.png"
           , textProp "property" "og:image"
           ]
       , meta_
-          [content_ "miso-ui", textProp "property" "og:sitename"]
+          [content_ "miso-book", textProp "property" "og:sitename"]
       , meta_ [content_ "en_US", textProp "property" "og:locale"]
       , meta_ [content_ "dmjio", textProp "property" "og:author"]
       , meta_
@@ -90,19 +102,19 @@ indexHtml =
           , name_ "twitter:card"
           ]
       , meta_
-          [ content_ "https://miso-ui.haskell-miso.org"
+          [ content_ "https://book.haskell-miso.org"
           , name_ "twitter:url"
           ]
       , meta_
-          [content_ "miso-ui", name_ "twitter:title"]
+          [content_ "miso-book", name_ "twitter:title"]
       , meta_
           [ content_
-              "A collection of all the components available in miso-ui"
+              "A collection of all the components available in miso-book"
           , name_ "twitter:description"
           ]
       , meta_
           [ content_
-              "https://miso-ui.haskell-miso.org/assets/social-screenshot.png"
+              "https://book.haskell-miso.org/assets/social-screenshot.png"
           , name_ "twitter:image"
           ]
       , meta_
@@ -151,8 +163,7 @@ indexHtml =
           max-width: 100%;
         }
       """
-     , body_ [] [ mount_ app ]
-     , div_ [ class_ "toaster", id_ "toaster" ] []
+     , body_ [] [ mount_ (app (toURI r)) ]
    ]
  ]
 -----------------------------------------------------------------------------

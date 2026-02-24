@@ -33,6 +33,22 @@ executable app
     containers >= 0.7,
     miso
   hs-source-dirs:
-    app
+    app, shared
+  other-modules:
+    Types
+  default-language:
+    Haskell2010
+
+executable prerender
+  import:
+    warnings
+  main-is:
+    Main.hs
+  build-depends:
+    base < 5, bytestring, miso
+  hs-source-dirs:
+    server, shared
+  other-modules:
+    Types
   default-language:
     Haskell2010
