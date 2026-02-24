@@ -525,7 +525,7 @@ view uri = div_
                         ]
                     ]
                 , button_
-                    [ textProp "onclick" ""
+                    [ textProp "onclick" "document.getElementById('command-search').showModal()"
                     , class_
                         "relative text-muted-foreground bg-background dark:bg-input/30 border-input flex items-center h-8 w-full min-w-0 rounded-md border px-3 py-1 gap-x-2 text-base md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none cursor-text max-w-72 sm:ml-auto"
                     , type_ "button"
